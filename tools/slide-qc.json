@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-11-07T07:16:54.604Z",
+  "report": [
+    {
+      "slide": "slide1.html",
+      "png": "slide1.png",
+      "width": 1080,
+      "height": 1920,
+      "blocks": 15,
+      "issues": []
+    },
+    {
+      "slide": "slide2.html",
+      "png": "slide2.png",
+      "width": 1080,
+      "height": 1920,
+      "blocks": 12,
+      "issues": []
+    },
+    {
+      "slide": "slide3.html",
+      "png": "slide3.png",
+      "width": 1080,
+      "height": 1920,
+      "blocks": 15,
+      "issues": []
+    }
+  ],
+  "pageErrors": []
+}

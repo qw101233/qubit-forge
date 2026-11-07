@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qubit Forge · 量子电路工坊</title>
+<style>
+:root{
+  --bg:#060911;
+  --panel:rgba(15,22,38,.82);
+  --panel-2:rgba(19,28,48,.72);
+  --line:rgba(120,180,255,.16);
+  --line-strong:rgba(120,200,255,.34);
+  --text:#e8f1ff;
+  --muted:#8fa4c4;
+  --cyan:#38e1ff;
+  --violet:#a98bff;
+  --magenta:#ff5cc8;
+  --amber:#ffc857;
+  --green:#52e0a4;
+  --mono:"Cascadia Code","JetBrains Mono",Consolas,"Courier New",monospace;
+  --sans:"Segoe UI","Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+  overflow:hidden;letter-spacing:.01em;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(720px 520px at 12% -8%, rgba(56,225,255,.13), transparent 62%),
+    radial-gradient(760px 620px at 96% 8%, rgba(169,139,255,.14), transparent 64%),
+    radial-gradient(900px 700px at 50% 115%, rgba(255,92,200,.09), transparent 66%),
+    linear-gradient(rgba(120,170,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120,170,255,.035) 1px, transparent 1px);
+  background-size:auto,auto,auto,46px 46px,46px 46px;
+}
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column}
+.topbar{
+  height:72px;flex:0 0 72px;display:flex;align-items:center;justify-content:space-between;
+  gap:18px;padding:0 20px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(9,14,26,.92),rgba(9,14,26,.55));
+  backdrop-filter:blur(10px);
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:230px}
+.logo{
+  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  font-family:var(--mono);font-weight:700;font-size:19px;color:#02121c;
+  background:linear-gradient(135deg,var(--cyan),#7af0ff 45%,var(--violet));
+  box-shadow:0 0 26px rgba(56,225,255,.38);
+}
+.brand h1{font-size:19px;margin:0;letter-spacing:.06em}
+.brand p{margin:2px 0 0;font-size:11.5px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.toolbar label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+select,button{
+  font-family:var(--sans);font-size:12.5px;color:var(--text);background:rgba(24,34,58,.9);
+  border:1px solid var(--line);border-radius:9px;padding:8px 11px;outline:none;cursor:pointer;
+  transition:border-color .15s,box-shadow .15s,background .15s;
+}
+select:hover,button:hover{border-color:var(--line-strong);background:rgba(32,46,78,.95)}
+select:focus-visible,button:focus-visible{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(56,225,255,.18)}
+.badge{
+  font-family:var(--mono);font-size:11px;color:var(--green);border:1px solid rgba(82,224,164,.32);
+  background:rgba(82,224,164,.08);padding:7px 10px;border-radius:8px;white-space:nowrap;
+}
+.layout{
+  flex:1;min-height:0;display:grid;grid-template-columns:248px minmax(0,1fr) 348px;
+  gap:14px;padding:14px 16px 16px;
+}
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:15px;
+  box-shadow:0 20px 46px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.04);
+  backdrop-filter:blur(12px);display:flex;flex-direction:column;min-height:0;
+}
+.panel-head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:13px 15px 10px;border-bottom:1px solid rgba(120,180,255,.1);
+}
+.panel-head h2{font-size:13px;margin:0;font-weight:650;letter-spacing:.06em}
+.panel-head span{font-size:11px;color:var(--muted);font-family:var(--mono);text-align:right}
+.palette{padding-bottom:12px}
+.gate-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:12px 13px 0;
+}
+.gate-btn{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 9px;
+  background:rgba(20,30,52,.85);text-align:left;min-height:47px;
+}
+.gate-btn .glyph{font-family:var(--mono);font-size:15px;font-weight:700;line-height:1.1}
+.gate-btn .gname{font-size:9.5px;color:var(--muted);letter-spacing:.03em}
+.gate-btn[data-cls="basic"] .glyph{color:var(--cyan)}
+.gate-btn[data-cls="phase"] .glyph{color:var(--violet)}
+.gate-btn[data-cls="rot"] .glyph{color:var(--amber)}
+.gate-btn[data-cls="multi"] .glyph{color:var(--magenta)}
+.gate-btn.active{
+  border-color:rgba(56,225,255,.66);background:rgba(56,225,255,.11);
+  box-shadow:0 0 0 1px rgba(56,225,255,.15),0 0 18px rgba(56,225,255,.16) inset;
+}
+.angle-row{padding:11px 14px 0;display:none}
+.angle-row.show{display:block}
+.angle-row .ar-top{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}
+.angle-row input[type=range]{width:100%;accent-color:var(--cyan);height:18px}
+.hint{font-size:11px;line-height:1.75;color:var(--muted);padding:11px 14px 0;margin:0}
+.hint b{color:var(--cyan);font-weight:600}
+.legend{padding:10px 14px 0;font-size:10.5px;color:var(--muted);line-height:1.7}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.gate-info{
+  margin:12px 13px 0;border-top:1px solid rgba(120,180,255,.13);
+  padding-top:10px;display:flex;flex-direction:column;gap:7px;
+}
+.gi-head{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted)}
+.gi-head b{font-family:var(--mono);color:var(--cyan);font-size:13px}
+.gi-matrix{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.gi-matrix span{
+  font-family:var(--mono);font-size:10.5px;color:#d8e7ff;text-align:center;
+  background:rgba(11,17,31,.6);border:1px solid rgba(120,180,255,.12);border-radius:6px;padding:5px 2px;
+}
+.gi-rule{font-size:10.5px;line-height:1.6;color:var(--muted)}
+.gi-rule b{color:#d8e7ff;font-family:var(--mono);font-weight:600}
+.stage{display:grid;grid-template-rows:auto minmax(0,1fr);gap:14px;min-width:0;min-height:0}
+.circuit-scroll{overflow:auto;padding:6px 10px 10px;flex:1;min-height:0}
+#circuitSvg{display:block;margin:0 auto}
+.cell{fill:transparent;cursor:pointer;transition:fill .12s}
+.cell:hover{fill:rgba(56,225,255,.055)}
+.wire{stroke:rgba(130,175,235,.36);stroke-width:1.6}
+.q-label{font-family:var(--mono);font-size:12px;fill:#9fb6d9;font-weight:600}
+.col-label{font-family:var(--mono);font-size:9.5px;fill:rgba(143,164,196,.55)}
+.gate-shape{cursor:pointer}
+.gate-body{stroke-width:1.3;rx:7}
+.g-basic .gate-body{fill:rgba(56,225,255,.16);stroke:rgba(56,225,255,.85)}
+.g-phase .gate-body{fill:rgba(169,139,255,.18);stroke:rgba(169,139,255,.9)}
+.g-rot .gate-body{fill:rgba(255,200,87,.16);stroke:rgba(255,200,87,.9)}
+.g-multi .gate-body{fill:rgba(255,92,200,.16);stroke:rgba(255,92,200,.9)}
+.gate-text{font-family:var(--mono);font-size:14px;font-weight:700;fill:#eaf5ff;dominant-baseline:middle;text-anchor:middle}
+.gate-sub{font-family:var(--mono);font-size:8.5px;fill:rgba(232,241,255,.72);dominant-baseline:middle;text-anchor:middle}
+.ctrl-line{stroke:rgba(255,92,200,.85);stroke-width:1.4}
+.ctrl-dot{fill:rgba(255,92,200,.95);stroke:none}
+.target-ring{fill:none;stroke:rgba(255,92,200,.95);stroke-width:1.5}
+.pending-cell{fill:rgba(56,225,255,.12);stroke:rgba(56,225,255,.7);stroke-dasharray:4 3;stroke-width:1.2}
+.hist-wrap{padding:8px 10px 8px;display:flex;flex-direction:column;min-height:0;flex:1}
+#histCanvas{width:100%;height:auto;flex:1 1 auto;min-height:190px;display:block}
+.hist-foot{display:flex;justify-content:space-between;gap:12px;padding:7px 3px 0;font-size:10.5px;color:var(--muted);flex-wrap:wrap}
+.hist-top{font-family:var(--mono);color:#cfe2ff;display:flex;gap:12px;flex-wrap:wrap}
+.hist-top i{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.phase-legend{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.phase-bar{width:86px;height:7px;border-radius:4px;background:linear-gradient(90deg,#38e1ff,#a98bff,#ff5cc8)}
+.side{display:flex;flex-direction:column;gap:14px;min-height:0;overflow-y:auto;padding-right:2px}
+.side .panel{flex:0 0 auto}
+.bloch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 12px 12px}
+.bloch-cell{background:rgba(11,17,31,.55);border:1px solid rgba(120,180,255,.11);border-radius:11px;padding:7px 6px 6px;text-align:center}
+.bloch-cell canvas{width:82px;height:82px;display:block;margin:0 auto}
+.bloch-meta{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.55;margin-top:2px;white-space:nowrap}
+.bloch-meta b{color:#cfe2ff;font-weight:600}
+.sample-list{padding:10px 13px 4px;display:flex;flex-direction:column;gap:6px}
+.sample-row{display:grid;grid-template-columns:58px 1fr 46px;align-items:center;gap:8px;font-family:var(--mono);font-size:11px}
+.sample-row .bits{color:#dbe9ff;letter-spacing:.08em}
+.sample-row .track{display:block;height:8px;border-radius:4px;background:rgba(120,170,255,.1);overflow:hidden}
+.sample-row .fill{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--cyan),var(--violet))}
+.sample-row .pct{text-align:right;color:var(--muted)}
+.sample-actions{padding:4px 13px 12px}
+.sample-actions button{width:100%;font-size:11.5px}
+.sample-empty{color:var(--muted);font-size:11px;padding:4px 0 8px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:11px 13px 13px}
+.stat{background:rgba(11,17,31,.5);border:1px solid rgba(120,180,255,.1);border-radius:9px;padding:7px 9px}
+.stat .k{font-size:9.5px;color:var(--muted);letter-spacing:.04em}
+.stat .v{font-family:var(--mono);font-size:13px;margin-top:2px;color:#dbeaff}
+.stat .v.good{color:var(--green)}
+#toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,18px);opacity:0;pointer-events:none;
+  background:rgba(16,25,44,.96);border:1px solid rgba(255,92,200,.5);color:#ffe4f6;
+  padding:9px 15px;border-radius:9px;font-size:12px;transition:.2s;z-index:9;font-family:var(--mono)
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:1200px){
+  .layout{grid-template-columns:220px minmax(0,1fr)}
+  .side{grid-column:1 / -1;display:grid;grid-template-columns:repeat(3,1fr);overflow:visible}
+}
+@media (max-width:860px){
+  .topbar{height:auto;flex-basis:auto;padding:12px 14px;align-items:flex-start;flex-direction:column;gap:10px}
+  .layout{grid-template-columns:1fr;overflow-y:auto}
+  .side{grid-template-columns:1fr}
+  .bloch-grid{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">Q</div>
+      <div>
+        <h1>Qubit Forge</h1>
+        <p>Quantum Circuit Workbench</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <label>量子比特
+        <select id="qubitCount" aria-label="量子比特数"></select>
+      </label>
+      <label>预设
+        <select id="presetSelect" aria-label="预设电路"></select>
+      </label>
+      <button id="btnClear" title="清空电路">清空</button>
+      <button id="btnRandom" title="生成随机电路">随机电路</button>
+      <span class="badge" id="runBadge">已同步</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel palette">
+      <div class="panel-head"><h2>门电路</h2><span>点击选中</span></div>
+      <div class="gate-grid" id="gateGrid"></div>
+      <div class="angle-row" id="angleRow">
+        <div class="ar-top"><span>旋转角 θ</span><span id="angleLabel">60°</span></div>
+        <input type="range" id="angleSlider" min="0" max="360" step="1" value="60" aria-label="旋转角">
+      </div>
+      <p class="hint" id="hint">
+        先选门，再点电路格子放置。<br>
+        双/三比特门需依次点击<b>控制位与目标位</b>。<br>
+        点击已有门可删除；<b>Esc</b> 取消待放置。
+      </p>
+      <div class="legend">
+        <i style="background:#38e1ff"></i>单比特门 · <i style="background:#a98bff"></i>相位门<br>
+        <i style="background:#ffc857"></i>旋转门 · <i style="background:#ff5cc8"></i>多比特门
+      </div>
+      <div class="gate-info" id="gateInfo"></div>
+    </aside>
+
+    <section class="stage">
+      <div class="panel circuit-panel">
+        <div class="panel-head"><h2>量子电路</h2><span id="circuitMeta">—</span></div>
+        <div class="circuit-scroll"><svg id="circuitSvg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      </div>
+      <div class="panel hist-panel">
+        <div class="panel-head"><h2>振幅分布</h2><span id="histMeta">—</span></div>
+        <div class="hist-wrap">
+          <canvas id="histCanvas"></canvas>
+          <div class="hist-foot">
+            <div class="hist-top" id="histTop">—</div>
+            <div class="phase-legend"><span>相位</span><span class="phase-bar"></span><span>0 → 2π</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <div class="panel">
+        <div class="panel-head"><h2>布洛赫球</h2><span>单比特约化态</span></div>
+        <div class="bloch-grid" id="blochGrid"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>测量采样</h2><span id="sampleMeta">—</span></div>
+        <div class="sample-list" id="sampleList"></div>
+        <div class="sample-actions"><button id="btnSample">重新采样 · 2000 shots</button></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>态诊断</h2><span>statevector</span></div>
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+    </aside>
+  </main>
+</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     Qubit Forge — 纯前端 statevector 量子电路模拟器
+     单文件、零依赖、classic script（file:// 可直接打开）
+     ============================================================ */
+
+  var MAX_QUBITS = 12;
+  var GATE_DEFS = {
+    H:     { name: 'Hadamard', cn: '哈达玛', k: 1, cls: 'basic' },
+    X:     { name: 'Pauli-X',  cn: '泡利 X', k: 1, cls: 'basic' },
+    Y:     { name: 'Pauli-Y',  cn: '泡利 Y', k: 1, cls: 'basic' },
+    Z:     { name: 'Pauli-Z',  cn: '泡利 Z', k: 1, cls: 'basic' },
+    S:     { name: 'Phase S',  cn: 'S 相位', k: 1, cls: 'phase' },
+    T:     { name: 'Phase T',  cn: 'T 相位', k: 1, cls: 'phase' },
+    RX:    { name: 'Rot X',    cn: 'X 旋转', k: 1, cls: 'rot', angle: true },
+    RY:    { name: 'Rot Y',    cn: 'Y 旋转', k: 1, cls: 'rot', angle: true },
+    RZ:    { name: 'Rot Z',    cn: 'Z 旋转', k: 1, cls: 'rot', angle: true },
+    CNOT:  { name: 'CNOT',     cn: '受控非', k: 2, cls: 'multi' },
+    CZ:    { name: 'CZ',       cn: '受控 Z', k: 2, cls: 'multi' },
+    CP:    { name: 'CP',       cn: '受控相位', k: 2, cls: 'multi', angle: true },
+    SWAP:  { name: 'SWAP',     cn: '交换', k: 2, cls: 'multi' },
+    TOFFOLI:{ name: 'Toffoli', cn: '三比特非', k: 3, cls: 'multi' }
+  };
+
+  var PRESETS = {
+    bell: { title: 'Bell 纠缠对', n: 2, desc: 'H + CNOT · 最大纠缠', gates: [
+      { type: 'H', qubits: [0], col: 0 },
+      { type: 'CNOT', qubits: [0, 1], col: 1 }
+    ]},
+    ghz: { title: 'GHZ 三体纠缠', n: 3, desc: 'Greenberger–Horne–Zeilinger', gates: [
+      { type: 'H', qubits: [0], col: 0 },
+      { type: 'CNOT', qubits: [0, 1], col: 1 },
+      { type: 'CNOT', qubits: [1, 2], col: 2 }
+    ]},
+    qft: { title: '量子傅里叶变换 QFT-3', n: 3, desc: 'H + 受控相位 + SWAP', gates: [
+      { type: 'H', qubits: [0], col: 0 },
+      { type: 'CP', qubits: [1, 0], angle: Math.PI / 2, col: 1 },
+      { type: 'CP', qubits: [2, 0], angle: Math.PI / 4, col: 2 },
+      { type: 'H', qubits: [1], col: 3 },
+      { type: 'CP', qubits: [2, 1], angle: Math.PI / 2, col: 4 },
+      { type: 'H', qubits: [2], col: 5 },
+      { type: 'SWAP', qubits: [0, 2], col: 6 }
+    ]},
+    grover: { title: 'Grover 搜索（标记 |11⟩）', n: 2, desc: '一次迭代达到 100% 命中', gates: [
+      { type: 'H', qubits: [0], col: 0 },
+      { type: 'H', qubits: [1], col: 0 },
+      { type: 'CZ', qubits: [0, 1], col: 1 },
+      { type: 'H', qubits: [0], col: 2 },
+      { type: 'H', qubits: [1], col: 2 },
+      { type: 'X', qubits: [0], col: 3 },
+      { type: 'X', qubits: [1], col: 3 },
+      { type: 'CZ', qubits: [0, 1], col: 4 },
+      { type: 'X', qubits: [0], col: 5 },
+      { type: 'X', qubits: [1], col: 5 },
+      { type: 'H', qubits: [0], col: 6 },
+      { type: 'H', qubits: [1], col: 6 }
+    ]},
+    dj: { title: 'Deutsch–Jozsa（平衡函数）', n: 3, desc: 'q0,q1 输入 + q2 辅助位', gates: [
+      { type: 'X', qubits: [2], col: 0 },
+      { type: 'H', qubits: [0], col: 1 },
+      { type: 'H', qubits: [1], col: 1 },
+      { type: 'H', qubits: [2], col: 1 },
+      { type: 'CNOT', qubits: [0, 2], col: 2 },
+      { type: 'H', qubits: [0], col: 3 },
+      { type: 'H', qubits: [1], col: 3 }
+    ]},
+    teleport: { title: '量子隐形传态', n: 3, desc: '用纠缠搬运未知态', gates: [
+      { type: 'RY', qubits: [0], angle: 0.927, col: 0 },
+      { type: 'H', qubits: [1], col: 1 },
+      { type: 'CNOT', qubits: [1, 2], col: 2 },
+      { type: 'CNOT', qubits: [0, 1], col: 3 },
+      { type: 'H', qubits: [0], col: 4 },
+      { type: 'CNOT', qubits: [1, 2], col: 5 },
+      { type: 'CZ', qubits: [0, 2], col: 6 }
+    ]},
+    uniform: { title: '均匀叠加 · 5 qubits', n: 5, desc: 'H⊗5 · 32 个等幅基态', gates: [
+      { type: 'H', qubits: [0], col: 0 },
+      { type: 'H', qubits: [1], col: 0 },
+      { type: 'H', qubits: [2], col: 0 },
+      { type: 'H', qubits: [3], col: 0 },
+      { type: 'H', qubits: [4], col: 0 }
+    ]}
+  };
+
+  var n = 3;
+  var circuit = [];
+  var nextId = 1;
+  var activeGate = 'H';
+  var angleDeg = 60;
+  var pending = null;
+  var dim = 1 << n;
+  var st = { re: new Float64Array(dim), im: new Float64Array(dim) };
+  var simMs = 0;
+  var sampleSeed = 20261107;
+  var lastSample = null;
+  var probs = new Float64Array(dim);
+  var maxCols = 8;
+
+  function $(id) { return document.getElementById(id); }
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var toastTimer = null;
+  function toast(msg) {
+    var el = $('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 1800);
+  }
+
+  /* ---------- statevector engine ---------- */
+
+  function resetState() {
+    dim = 1 << n;
+    st.re = new Float64Array(dim);
+    st.im = new Float64Array(dim);
+    st.re[0] = 1;
+  }
+
+  function apply1q(q, ar, ai, br, bi, cr, ci, dr, di) {
+    var stride = 1 << (n - 1 - q);
+    var N = dim;
+    for (var base = 0; base < N; base += stride << 1) {
+      for (var off = 0; off < stride; off++) {
+        var i = base + off, j = i + stride;
+        var xr = st.re[i], xi = st.im[i], yr = st.re[j], yi = st.im[j];
+        st.re[i] = ar * xr - ai * xi + br * yr - bi * yi;
+        st.im[i] = ar * xi + ai * xr + br * yi + bi * yr;
+        st.re[j] = cr * xr - ci * xi + dr * yr - di * yi;
+        st.im[j] = cr * xi + ci * xr + dr * yi + di * yr;
+      }
+    }
+  }
+
+  function bitOf(idx, q) { return (idx >> (n - 1 - q)) & 1; }
+
+  function applyControlled(kind, c, t, angle) {
+    var N = dim;
+    var cb = 1 << (n - 1 - c);
+    var tb = 1 << (n - 1 - t);
+    var cos = Math.cos(angle), sin = Math.sin(angle);
+    for (var i = 0; i < N; i++) {
+      var ci = (i & cb) !== 0, ti = (i & tb) !== 0;
+      if (!ci) continue;
+      if (kind === 'CX') {
+        if (ti) continue;
+        var j = i | tb;
+        var tr = st.re[i], ti2 = st.im[i];
+        st.re[i] = st.re[j]; st.im[i] = st.im[j];
+        st.re[j] = tr; st.im[j] = ti2;
+      } else if (kind === 'CZ') {
+        if (!ti) continue;
+        st.re[i] = -st.re[i]; st.im[i] = -st.im[i];
+      } else if (kind === 'CP') {
+        if (!ti) continue;
+        var r = st.re[i], im = st.im[i];
+        st.re[i] = r * cos - im * sin;
+        st.im[i] = r * sin + im * cos;
+      }
+    }
+  }
+
+  function applySwap(c, t) {
+    var N = dim;
+    var cb = 1 << (n - 1 - c), tb = 1 << (n - 1 - t);
+    for (var i = 0; i < N; i++) {
+      if ((i & cb) && !(i & tb)) {
+        var j = i ^ cb ^ tb;
+        var tr = st.re[i], ti = st.im[i];
+        st.re[i] = st.re[j]; st.im[i] = st.im[j];
+        st.re[j] = tr; st.im[j] = ti;
+      }
+    }
+  }
+
+  function applyToffoli(c1, c2, t) {
+    var N = dim;
+    var m1 = 1 << (n - 1 - c1), m2 = 1 << (n - 1 - c2), mt = 1 << (n - 1 - t);
+    for (var i = 0; i < N; i++) {
+      if ((i & m1) && (i & m2) && !(i & mt)) {
+        var j = i | mt;
+        var tr = st.re[i], ti = st.im[i];
+        st.re[i] = st.re[j]; st.im[i] = st.im[j];
+        st.re[j] = tr; st.im[j] = ti;
+      }
+    }
+  }
+
+  function applyGate(g) {
+    var q = g.qubits;
+    var a = g.angle || 0;
+    if (GATE_DEFS[g.type].k === 1) {
+      var m = singleMatrix(g.type, a);
+      apply1q(q[0], m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7]);
+      return;
+    }
+    switch (g.type) {
+      case 'CNOT': applyControlled('CX', q[0], q[1], 0); break;
+      case 'CZ': applyControlled('CZ', q[0], q[1], 0); break;
+      case 'CP': applyControlled('CP', q[0], q[1], a); break;
+      case 'SWAP': applySwap(q[0], q[1]); break;
+      case 'TOFFOLI': applyToffoli(q[0], q[1], q[2]); break;
+    }
+  }
+
+  function singleMatrix(type, a) {
+    var s = Math.SQRT1_2;
+    switch (type) {
+      case 'H': return [s, 0, s, 0, s, 0, -s, 0];
+      case 'X': return [0, 0, 1, 0, 1, 0, 0, 0];
+      case 'Y': return [0, 0, 0, -1, 0, 1, 0, 0];
+      case 'Z': return [1, 0, 0, 0, 0, 0, -1, 0];
+      case 'S': return [1, 0, 0, 0, 0, 0, 0, 1];
+      case 'T': {
+        var c4 = Math.cos(Math.PI / 4);
+        return [1, 0, 0, 0, 0, 0, c4, c4];
+      }
+      case 'RX': {
+        var c = Math.cos(a / 2), sn = Math.sin(a / 2);
+        return [c, 0, 0, -sn, 0, -sn, c, 0];
+      }
+      case 'RY': {
+        var cy = Math.cos(a / 2), sy = Math.sin(a / 2);
+        return [cy, 0, -sy, 0, sy, 0, cy, 0];
+      }
+      case 'RZ': {
+        var cz = Math.cos(a / 2), sz = Math.sin(a / 2);
+        return [cz, -sz, 0, 0, 0, 0, cz, sz];
+      }
+    }
+    return [1, 0, 0, 0, 0, 0, 1, 0];
+  }
+
+  function computeProbs() {
+    var N = dim;
+    probs = new Float64Array(N);
+    var acc = 0;
+    for (var i = 0; i < N; i++) {
+      var p = st.re[i] * st.re[i] + st.im[i] * st.im[i];
+      probs[i] = p;
+      acc += p;
+    }
+    return acc;
+  }
+
+  function runSim() {
+    resetState();
+    var t0 = performance.now();
+    var sorted = circuit.slice().sort(function (a, b) {
+      return a.col - b.col || a.id - b.id;
+    });
+    for (var i = 0; i < sorted.length; i++) applyGate(sorted[i]);
+    simMs = performance.now() - t0;
+    var norm = computeProbs();
+    return norm;
+  }
+
+  function blochOf(q) {
+    var N = dim, mask = 1 << (n - 1 - q);
+    var r00 = 0, r11 = 0, r01re = 0, r01im = 0;
+    for (var i = 0; i < N; i++) {
+      var ar = st.re[i], ai = st.im[i];
+      var p = ar * ar + ai * ai;
+      if (i & mask) { r11 += p; }
+      else {
+        r00 += p;
+        var j = i | mask;
+        var br = st.re[j], bi = st.im[j];
+        r01re += ar * br + ai * bi;
+        r01im += ai * br - ar * bi;
+      }
+    }
+    var x = 2 * r01re, y = -2 * r01im, z = r00 - r11;
+    var r = Math.sqrt(x * x + y * y + z * z);
+    if (r > 1) { x /= r; y /= r; z /= r; r = 1; }
+    var lp = (1 + r) / 2, lm = (1 - r) / 2;
+    var S = 0;
+    if (lp > 1e-12) S -= lp * Math.log(lp) / Math.LN2;
+    if (lm > 1e-12) S -= lm * Math.log(lm) / Math.LN2;
+    return { x: x, y: y, z: z, r: r, entropy: S, purity: r * r, p0: r00, p1: r11 };
+  }
+
+  function shannonEntropy() {
+    var N = dim, S = 0;
+    for (var i = 0; i < N; i++) {
+      var p = probs[i];
+      if (p > 1e-14) S -= p * Math.log(p) / Math.LN2;
+    }
+    return S;
+  }
+
+  function bitsOf(i) {
+    var s = '';
+    for (var q = 0; q < n; q++) s += ((i >> (n - 1 - q)) & 1);
+    return s;
+  }
+
+  function sampleShots(shots, seed) {
+    var N = dim, rnd = mulberry32(seed >>> 0);
+    var cdf = new Float64Array(N), acc = 0;
+    for (var i = 0; i < N; i++) { acc += probs[i]; cdf[i] = acc; }
+    if (acc <= 0) acc = 1;
+    var counts = new Array(N); for (var k = 0; k < N; k++) counts[k] = 0;
+    for (var s = 0; s < shots; s++) {
+      var r = rnd() * acc;
+      var lo = 0, hi = N - 1;
+      while (lo < hi) { var mid = (lo + hi) >> 1; if (cdf[mid] < r) lo = mid + 1; else hi = mid; }
+      counts[lo]++;
+    }
+    var entries = [];
+    for (var idx = 0; idx < N; idx++) {
+      if (counts[idx] > 0) entries.push({ bits: bitsOf(idx), index: idx, count: counts[idx], p: probs[idx] });
+    }
+    entries.sort(function (a, b) { return b.count - a.count || a.index - b.index; });
+    return { shots: shots, seed: seed, entries: entries, top: entries.slice(0, 6) };
+  }
+
+  /* ---------- circuit model ---------- */
+
+  function maxCol() {
+    var m = 0;
+    for (var i = 0; i < circuit.length; i++) if (circuit[i].col > m) m = circuit[i].col;
+    return m;
+  }
+  function gatesAt(col) {
+    return circuit.filter(function (g) { return g.col === col; });
+  }
+  function conflict(col, qubits) {
+    var own = gatesAt(col);
+    for (var i = 0; i < own.length; i++) {
+      for (var j = 0; j < own[i].qubits.length; j++) {
+        if (qubits.indexOf(own[i].qubits[j]) !== -1) return true;
+      }
+    }
+    return false;
+  }
+  function addGate(g) {
+    var def = GATE_DEFS[g.type];
+    if (!def) throw new Error('unknown gate ' + g.type);
+    var qubits = g.qubits.slice();
+    if (qubits.length !== def.k) throw new Error(g.type + ' needs ' + def.k + ' qubits');
+    qubits.forEach(function (q) {
+      if (!Number.isInteger(q) || q < 0 || q >= n) throw new Error('bad qubit ' + q);
+    });
+    if (new Set(qubits).size !== qubits.length) throw new Error('duplicate qubit');
+    var col = (g.col === undefined || g.col === null) ? maxCol() + 1 : g.col;
+    if (conflict(col, qubits)) throw new Error('column occupied');
+    var gate = {
+      id: nextId++,
+      type: g.type,
+      qubits: qubits,
+      angle: def.angle ? (g.angle === undefined ? Math.PI / 3 : g.angle) : 0,
+      col: col
+    };
+    circuit.push(gate);
+    return gate;
+  }
+
+  /* ---------- rendering ---------- */
+
+  var PHASE_HUES = [190, 300];
+
+  function phaseColor(phase) {
+    var t = ((phase % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    t /= (2 * Math.PI);
+    var hue = PHASE_HUES[0] + (PHASE_HUES[1] - PHASE_HUES[0]) * Math.min(1, Math.max(0, t));
+    return 'hsl(' + hue.toFixed(0) + ',92%,62%)';
+  }
+
+  function renderGateInfo() {
+    var el = $('gateInfo');
+    if (!el) return;
+    var def = GATE_DEFS[activeGate];
+    var head = '<div class="gi-head"><span>当前门</span><b>' + activeGate + '</b></div>';
+    if (def.k === 1) {
+      var m = singleMatrix(activeGate, angleDeg * Math.PI / 180);
+      var cells = [complexStr(m[0], m[1]), complexStr(m[2], m[3]), complexStr(m[4], m[5]), complexStr(m[6], m[7])];
+      el.innerHTML = head +
+        '<div class="gi-matrix">' + cells.map(function (c) { return '<span>' + c + '</span>'; }).join('') + '</div>' +
+        '<div class="gi-rule">' + def.cn + ' · ' + def.name + '</div>';
+    } else {
+      var rule = '';
+      if (activeGate === 'CNOT') rule = '<b>|c,t⟩ → |c, t⊕c⟩</b>';
+      if (activeGate === 'CZ') rule = '<b>|11⟩ → −|11⟩</b>';
+      if (activeGate === 'CP') rule = '<b>|11⟩ → e<sup>iθ</sup>|11⟩</b> · θ = ' + angleDeg + '°';
+      if (activeGate === 'SWAP') rule = '<b>交换两个比特</b>';
+      if (activeGate === 'TOFFOLI') rule = '<b>c₁=c₂=1 时翻转目标位</b>';
+      el.innerHTML = head + '<div class="gi-rule">' + rule + '</div>' +
+        '<div class="gi-rule">' + def.name + ' · ' + def.k + ' qubits</div>';
+    }
+  }
+
+  function numStr(x) {
+    if (Math.abs(x - Math.round(x)) < 1e-9) return String(Math.round(x)).replace('-', '−');
+    return x.toFixed(3).replace('-', '−');
+  }
+  function complexStr(re, im) {
+    var eps = 5e-10;
+    var hasRe = Math.abs(re) > eps, hasIm = Math.abs(im) > eps;
+    if (!hasRe && !hasIm) return '0';
+    var rs = hasRe ? numStr(re) : '';
+    if (!hasIm) return rs;
+    var a = Math.abs(im);
+    var iStr = (Math.abs(a - 1) < 1e-9 ? '' : numStr(a)) + 'i';
+    if (!hasRe) return (im < 0 ? '−' : '') + iStr;
+    return rs + (im < 0 ? ' − ' : ' + ') + iStr;
+  }
+
+  function renderCircuit() {
+    var svg = $('circuitSvg');
+    var rowH = 52, topPad = 34, leftPad = 64, colW = 64, boxW = 38, boxH = 33;
+    var used = maxCol() + 1;
+    maxCols = Math.max(8, used, 8);
+    var width = leftPad + maxCols * colW + 18;
+    var height = topPad + n * rowH + 10;
+    svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+    svg.setAttribute('width', width);
+    svg.setAttribute('height', height);
+    svg.style.width = width + 'px';
+    svg.style.height = height + 'px';
+
+    var yOf = function (q) { return topPad + q * rowH + rowH / 2; };
+    var html = '';
+
+    for (var c = 0; c < maxCols; c++) {
+      html += '<text class="col-label" x="' + (leftPad + c * colW + colW / 2) + '" y="14" text-anchor="middle">' + (c + 1) + '</text>';
+    }
+    for (var q = 0; q < n; q++) {
+      html += '<text class="q-label" x="14" y="' + (yOf(q) + 4) + '">q' + q + '</text>';
+      html += '<line class="wire" x1="' + (leftPad - 16) + '" y1="' + yOf(q) + '" x2="' + (width - 14) + '" y2="' + yOf(q) + '"></line>';
+    }
+    for (var c2 = 0; c2 < maxCols; c2++) {
+      for (var q2 = 0; q2 < n; q2++) {
+        html += '<rect class="cell" data-cell="1" data-q="' + q2 + '" data-col="' + c2 +
+          '" x="' + (leftPad + c2 * colW) + '" y="' + (yOf(q2) - rowH / 2) + '" width="' + colW + '" height="' + rowH + '"></rect>';
+      }
+    }
+    if (pending) {
+      html += '<rect class="pending-cell" x="' + (leftPad + pending.col * colW + (colW - boxW) / 2) +
+        '" y="' + (yOf(pending.qubits[0]) - boxH / 2) + '" width="' + boxW + '" height="' + boxH + '" rx="7"></rect>';
+    }
+
+    for (var gi = 0; gi < circuit.length; gi++) {
+      var g = circuit[gi];
+      var def = GATE_DEFS[g.type];
+      var cls = 'g-' + def.cls;
+      var cx = leftPad + g.col * colW + colW / 2;
+      html += '<g class="' + cls + '" data-gate-id="' + g.id + '">';
+      if (def.k === 1) {
+        html += '<rect class="gate-body" x="' + (cx - boxW / 2) + '" y="' + (yOf(g.qubits[0]) - boxH / 2) +
+          '" width="' + boxW + '" height="' + boxH + '" rx="7"></rect>';
+        html += '<text class="gate-text" x="' + cx + '" y="' + yOf(g.qubits[0]) + '">' + g.type + '</text>';
+        if (def.angle) {
+          html += '<text class="gate-sub" x="' + cx + '" y="' + (yOf(g.qubits[0]) + boxH / 2 + 9) + '">' +
+            Math.round(g.angle * 180 / Math.PI) + '°</text>';
+        }
+      } else if (g.type === 'CNOT' || g.type === 'TOFFOLI') {
+        var ctrlList = g.qubits.slice(0, -1);
+        var tq = g.qubits[g.qubits.length - 1];
+        var yTop = Math.min.apply(null, g.qubits.map(yOf));
+        var yBot = Math.max.apply(null, g.qubits.map(yOf));
+        html += '<line class="ctrl-line" x1="' + cx + '" y1="' + yTop + '" x2="' + cx + '" y2="' + yBot + '"></line>';
+        for (var ci = 0; ci < ctrlList.length; ci++) {
+          html += '<circle class="ctrl-dot" cx="' + cx + '" cy="' + yOf(ctrlList[ci]) + '" r="4.2"></circle>';
+        }
+        html += '<circle class="target-ring" cx="' + cx + '" cy="' + yOf(tq) + '" r="13"></circle>';
+        html += '<line class="ctrl-line" x1="' + (cx - 13) + '" y1="' + yOf(tq) + '" x2="' + (cx + 13) + '" y2="' + yOf(tq) + '"></line>';
+        html += '<line class="ctrl-line" x1="' + cx + '" y1="' + (yOf(tq) - 13) + '" x2="' + cx + '" y2="' + (yOf(tq) + 13) + '"></line>';
+      } else if (g.type === 'CZ') {
+        var y2a = yOf(g.qubits[0]), y2b = yOf(g.qubits[1]);
+        html += '<line class="ctrl-line" x1="' + cx + '" y1="' + Math.min(y2a, y2b) + '" x2="' + cx + '" y2="' + Math.max(y2a, y2b) + '"></line>';
+        html += '<circle class="ctrl-dot" cx="' + cx + '" cy="' + y2a + '" r="4.2"></circle>';
+        html += '<rect class="gate-body" x="' + (cx - 13) + '" y="' + (y2b - 13) + '" width="26" height="26" rx="6"></rect>';
+        html += '<text class="gate-text" x="' + cx + '" y="' + y2b + '">Z</text>';
+      } else if (g.type === 'CP') {
+        var y3a = yOf(g.qubits[0]), y3b = yOf(g.qubits[1]);
+        html += '<line class="ctrl-line" x1="' + cx + '" y1="' + Math.min(y3a, y3b) + '" x2="' + cx + '" y2="' + Math.max(y3a, y3b) + '"></line>';
+        html += '<circle class="ctrl-dot" cx="' + cx + '" cy="' + y3a + '" r="4.2"></circle>';
+        html += '<rect class="gate-body" x="' + (cx - 16) + '" y="' + (y3b - 13) + '" width="32" height="26" rx="6"></rect>';
+        html += '<text class="gate-text" x="' + cx + '" y="' + y3b + '">P</text>';
+      } else if (g.type === 'SWAP') {
+        var y4a = yOf(g.qubits[0]), y4b = yOf(g.qubits[1]);
+        html += '<line class="ctrl-line" x1="' + cx + '" y1="' + Math.min(y4a, y4b) + '" x2="' + cx + '" y2="' + Math.max(y4a, y4b) + '"></line>';
+        html += '<text class="gate-text" x="' + cx + '" y="' + y4a + '">×</text>';
+        html += '<text class="gate-text" x="' + cx + '" y="' + y4b + '">×</text>';
+      }
+      html += '</g>';
+    }
+    svg.innerHTML = html;
+
+    var depth = circuit.length ? maxCol() + 1 : 0;
+    $('circuitMeta').textContent = circuit.length + ' 门 · 深度 ' + depth + ' · ' + n + ' qubits';
+  }
+
+  function renderHistogram() {
+    var canvas = $('histCanvas');
+    var dpr = window.devicePixelRatio || 1;
+    var cw = Math.max(280, canvas.clientWidth || 600);
+    var ch = Math.max(190, Math.round(canvas.clientHeight || 220));
+    if (canvas.width !== Math.round(cw * dpr) || canvas.height !== Math.round(ch * dpr)) {
+      canvas.width = Math.round(cw * dpr);
+      canvas.height = Math.round(ch * dpr);
+    }
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cw, ch);
+
+    var padL = 34, padR = 10, padT = 12, padB = 30;
+    var plotW = cw - padL - padR, plotH = ch - padT - padB;
+    var N = dim;
+    var bins = N <= 512 ? N : 256;
+    var group = N / bins;
+    var binP = new Float64Array(bins), binRe = new Float64Array(bins), binIm = new Float64Array(bins);
+    for (var i = 0; i < N; i++) {
+      var b = Math.floor(i / group);
+      binP[b] += probs[i];
+      binRe[b] += st.re[i];
+      binIm[b] += st.im[i];
+    }
+    var maxP = 0;
+    for (var b2 = 0; b2 < bins; b2++) if (binP[b2] > maxP) maxP = binP[b2];
+    if (maxP <= 0) maxP = 1;
+
+    // grid
+    ctx.strokeStyle = 'rgba(120,170,255,.12)';
+    ctx.lineWidth = 1;
+    ctx.font = '10px "Cascadia Code", Consolas, monospace';
+    ctx.fillStyle = 'rgba(143,164,196,.8)';
+    for (var gy = 0; gy <= 4; gy++) {
+      var y = padT + plotH * gy / 4;
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + plotW, y); ctx.stroke();
+      var val = maxP * (1 - gy / 4);
+      ctx.fillText((val * 100).toFixed(1) + '%', 4, y + 3.5);
+    }
+
+    var barW = plotW / bins;
+    for (var b3 = 0; b3 < bins; b3++) {
+      if (binP[b3] <= 1e-14) continue;
+      var h = Math.max(1, binP[b3] / maxP * plotH);
+      var ph = Math.atan2(binIm[b3], binRe[b3]);
+      ctx.fillStyle = phaseColor(ph);
+      ctx.globalAlpha = 0.92;
+      if (bins <= 64) {
+        ctx.fillRect(padL + b3 * barW + 1, padT + plotH - h, Math.max(1, barW - 2), h);
+      } else {
+        ctx.fillRect(padL + b3 * barW, padT + plotH - h, Math.max(1, barW), h);
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    // axis
+    ctx.strokeStyle = 'rgba(120,170,255,.3)';
+    ctx.beginPath(); ctx.moveTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH); ctx.stroke();
+
+    if (N <= 16) {
+      ctx.font = '10px "Cascadia Code", Consolas, monospace';
+      ctx.fillStyle = 'rgba(200,220,250,.85)';
+      ctx.textAlign = 'center';
+      for (var bi = 0; bi < N; bi++) {
+        ctx.fillText(bitsOf(bi), padL + bi * barW + barW / 2, ch - 10);
+      }
+      ctx.textAlign = 'left';
+    } else {
+      ctx.font = '10px "Cascadia Code", Consolas, monospace';
+      ctx.fillStyle = 'rgba(143,164,196,.8)';
+      ctx.fillText(bins + ' bins · ' + N + ' states', padL, ch - 10);
+    }
+
+    var peakIdx = 0;
+    for (var pi = 0; pi < N; pi++) if (probs[pi] > probs[peakIdx]) peakIdx = pi;
+    $('histMeta').textContent = '维度 ' + N + ' · 峰值 ' + (probs[peakIdx] * 100).toFixed(2) + '%';
+
+    // top states
+    var top = [];
+    for (var ti = 0; ti < N; ti++) if (probs[ti] > 1e-12) top.push(ti);
+    top.sort(function (a, b) { return probs[b] - probs[a] || a - b; });
+    var topHtml = '';
+    for (var k = 0; k < Math.min(4, top.length); k++) {
+      var idx = top[k];
+      var ph2 = Math.atan2(st.im[idx], st.re[idx]);
+      topHtml += '<span><i style="background:' + phaseColor(ph2) + '"></i>|' + bitsOf(idx) + '⟩ ' +
+        (probs[idx] * 100).toFixed(2) + '%</span>';
+    }
+    $('histTop').innerHTML = topHtml || '—';
+  }
+
+  function drawBloch(canvas, m, q) {
+    var dpr = window.devicePixelRatio || 1;
+    var size = 82;
+    if (canvas.width !== Math.round(size * dpr)) {
+      canvas.width = Math.round(size * dpr); canvas.height = Math.round(size * dpr);
+    }
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, size, size);
+    var cx = size / 2, cy = size / 2 + 2, R = 30;
+
+    var g = ctx.createRadialGradient(cx - 8, cy - 10, 4, cx, cy, R);
+    g.addColorStop(0, 'rgba(56,225,255,.18)');
+    g.addColorStop(1, 'rgba(20,32,56,.06)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(120,190,255,.32)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(120,190,255,.18)';
+    ctx.beginPath(); ctx.ellipse(cx, cy, R, R * 0.34, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx, cy, R * 0.34, R, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(120,190,255,.3)';
+    ctx.beginPath(); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.stroke();
+
+    ctx.font = '8px "Cascadia Code", Consolas, monospace';
+    ctx.fillStyle = 'rgba(180,205,240,.75)';
+    ctx.textAlign = 'center';
+    ctx.fillText('|0⟩', cx, cy - R - 2);
+    ctx.fillText('|1⟩', cx, cy + R + 9);
+
+    var ex = cx + m.x * R, ey = cy - m.z * R;
+    var vg = ctx.createLinearGradient(cx, cy, ex, ey);
+    vg.addColorStop(0, 'rgba(56,225,255,.35)');
+    vg.addColorStop(1, '#38e1ff');
+    ctx.strokeStyle = vg;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.fillStyle = '#38e1ff';
+    ctx.beginPath(); ctx.arc(ex, ey, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(56,225,255,.35)';
+    ctx.beginPath(); ctx.arc(cx, cy, 2, 0, Math.PI * 2); ctx.fill();
+
+    return null;
+  }
+
+  function renderBloch() {
+    var grid = $('blochGrid');
+    var html = '';
+    for (var q = 0; q < n; q++) {
+      var m = blochOf(q);
+      html += '<div class="bloch-cell"><canvas id="bloch' + q + '" width="82" height="82"></canvas>' +
+        '<div class="bloch-meta">q' + q + ' · <b>r=' + m.r.toFixed(2) + '</b><br>S=' + m.entropy.toFixed(2) + ' bit</div></div>';
+    }
+    grid.innerHTML = html;
+    for (var q2 = 0; q2 < n; q2++) {
+      drawBloch($('bloch' + q2), blochOf(q2), q2);
+    }
+  }
+
+  function renderSample() {
+    lastSample = sampleShots(2000, sampleSeed);
+    var list = $('sampleList');
+    var html = '';
+    var shown = Math.min(4, lastSample.top.length);
+    for (var i = 0; i < shown; i++) {
+      var e = lastSample.top[i];
+      var pct = (e.count / lastSample.shots * 100);
+      html += '<div class="sample-row"><span class="bits">|' + e.bits + '⟩</span>' +
+        '<span class="track"><span class="fill" style="width:' + Math.min(100, pct).toFixed(1) + '%"></span></span>' +
+        '<span class="pct">' + pct.toFixed(1) + '%</span></div>';
+    }
+    if (!shown) html = '<div class="sample-empty">尚未采样</div>';
+    list.innerHTML = html;
+    $('sampleMeta').textContent = 'seed ' + sampleSeed + ' · ' + lastSample.shots + ' shots';
+  }
+
+  function renderStats(norm) {
+    var nonzero = 0;
+    for (var i = 0; i < dim; i++) {
+      if (st.re[i] * st.re[i] + st.im[i] * st.im[i] > 1e-12) nonzero++;
+    }
+    var peak = 0;
+    for (var j = 0; j < dim; j++) if (probs[j] > peak) peak = probs[j];
+    var items = [
+      ['维度 2^n', dim.toString()],
+      ['非零振幅', nonzero.toString()],
+      ['总概率', norm.toFixed(12), norm > 0.999999 && norm < 1.000001],
+      ['峰值概率', (peak * 100).toFixed(4) + '%'],
+      ['香农熵', shannonEntropy().toFixed(4) + ' bit'],
+      ['模拟耗时', simMs.toFixed(3) + ' ms']
+    ];
+    var html = '';
+    for (var k = 0; k < items.length; k++) {
+      html += '<div class="stat"><div class="k">' + items[k][0] + '</div><div class="v' +
+        (items[k][2] ? ' good' : '') + '">' + items[k][1] + '</div></div>';
+    }
+    $('statsGrid').innerHTML = html;
+  }
+
+  function refresh() {
+    var norm = runSim();
+    renderCircuit();
+    renderGateInfo();
+    renderHistogram();
+    renderBloch();
+    renderStats(norm);
+    renderSample();
+    var badge = $('runBadge');
+    badge.textContent = '已同步 · ' + simMs.toFixed(2) + ' ms';
+  }
+
+  /* ---------- interaction ---------- */
+
+  function placeAt(q, col) {
+    var def = GATE_DEFS[activeGate];
+    if (!def) return;
+    if (pending) {
+      if (q === pending.qubits[0] && def.k === 2) { toast('目标位必须不同'); return; }
+      if (pending.qubits.indexOf(q) !== -1) { toast('该比特已在本次放置中'); return; }
+      var qs = pending.qubits.concat([q]);
+      if (qs.length < def.k) { pending.qubits.push(q); renderCircuit(); return; }
+      if (conflict(pending.col, qs)) { toast('该列比特已被占用'); pending = null; renderCircuit(); return; }
+      var g = { type: activeGate, qubits: qs, angle: angleDeg * Math.PI / 180, col: pending.col };
+      try { addGate(g); } catch (err) { toast(err.message); }
+      pending = null;
+      refresh();
+      return;
+    }
+    if (def.k > 1) {
+      if (conflict(col, [q])) { toast('该列比特已被占用'); return; }
+      pending = { type: activeGate, qubits: [q], col: col };
+      renderCircuit();
+      toast('已选控制位 q' + q + '，请点击目标位');
+      return;
+    }
+    if (conflict(col, [q])) { toast('该格已有门'); return; }
+    try {
+      addGate({ type: activeGate, qubits: [q], angle: angleDeg * Math.PI / 180, col: col });
+    } catch (err) { toast(err.message); return; }
+    refresh();
+  }
+
+  function removeGate(id) {
+    circuit = circuit.filter(function (g) { return g.id !== id; });
+    pending = null;
+    refresh();
+  }
+
+  function clearCircuit() {
+    circuit = [];
+    pending = null;
+    refresh();
+    toast('电路已清空');
+  }
+
+  function setQubits(nq) {
+    nq = Math.max(1, Math.min(MAX_QUBITS, Number(nq) || 1));
+    n = nq;
+    dim = 1 << n;
+    circuit = [];
+    pending = null;
+    probs = new Float64Array(dim);
+    st = { re: new Float64Array(dim), im: new Float64Array(dim) };
+    st.re[0] = 1;
+    $('qubitCount').value = n;
+    refresh();
+  }
+
+  function loadPreset(name) {
+    var p = PRESETS[name];
+    if (!p) return;
+    n = p.n;
+    dim = 1 << n;
+    circuit = [];
+    nextId = 1;
+    pending = null;
+    p.gates.forEach(function (g) {
+      circuit.push({
+        id: nextId++,
+        type: g.type,
+        qubits: g.qubits.slice(),
+        angle: g.angle === undefined ? 0 : g.angle,
+        col: g.col
+      });
+    });
+    maxCols = Math.max(8, maxCol() + 1);
+    $('qubitCount').value = n;
+    $('presetSelect').value = name;
+    refresh();
+  }
+
+  function randomCircuit(seed) {
+    seed = seed === undefined ? (Date.now() & 0xffffffff) : seed;
+    var rnd = mulberry32(seed);
+    var oneQ = ['H', 'X', 'Y', 'Z', 'S', 'T', 'RX', 'RY', 'RZ'];
+    var list = [];
+    var steps = 10;
+    for (var s = 0; s < steps; s++) {
+      var q = Math.floor(rnd() * n);
+      if (n > 1 && rnd() < 0.4) {
+        var t = Math.floor(rnd() * n);
+        if (t === q) t = (t + 1) % n;
+        list.push({ id: nextId++, type: 'CNOT', qubits: [q, t], angle: 0, col: s });
+      } else {
+        var type = oneQ[Math.floor(rnd() * oneQ.length)];
+        list.push({ id: nextId++, type: type, qubits: [q], angle: Math.PI / 3, col: s });
+      }
+    }
+    circuit = list;
+    pending = null;
+    $('presetSelect').value = '';
+    refresh();
+    return seed;
+  }
+
+  function buildUI() {
+    var qc = $('qubitCount');
+    for (var i = 1; i <= MAX_QUBITS; i++) {
+      var o = document.createElement('option');
+      o.value = i; o.textContent = i + ' qubits';
+      qc.appendChild(o);
+    }
+    qc.value = n;
+
+    var ps = $('presetSelect');
+    var blank = document.createElement('option');
+    blank.value = ''; blank.textContent = '自由编辑';
+    ps.appendChild(blank);
+    Object.keys(PRESETS).forEach(function (key) {
+      var o2 = document.createElement('option');
+      o2.value = key; o2.textContent = PRESETS[key].title;
+      ps.appendChild(o2);
+    });
+
+    var grid = $('gateGrid');
+    Object.keys(GATE_DEFS).forEach(function (key) {
+      var def = GATE_DEFS[key];
+      var b = document.createElement('button');
+      b.className = 'gate-btn' + (key === activeGate ? ' active' : '');
+      b.setAttribute('data-gate', key);
+      b.setAttribute('data-cls', def.cls);
+      b.title = def.cn + ' · ' + def.name + (def.k > 1 ? ' · ' + def.k + ' qubits' : '');
+      b.innerHTML = '<span class="glyph">' + key + '</span><span class="gname">' + def.cn + '</span>';
+      b.addEventListener('click', function () {
+        activeGate = key;
+        pending = null;
+        document.querySelectorAll('.gate-btn').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        $('angleRow').classList.toggle('show', !!def.angle);
+        $('angleLabel').textContent = angleDeg + '°';
+        renderCircuit();
+        renderGateInfo();
+        toast('已选 ' + key + ' · 点击电路放置');
+      });
+      grid.appendChild(b);
+    });
+
+    $('angleRow').classList.toggle('show', !!GATE_DEFS[activeGate].angle);
+    $('angleLabel').textContent = angleDeg + '°';
+    $('angleSlider').addEventListener('input', function (e) {
+      angleDeg = Number(e.target.value);
+      $('angleLabel').textContent = angleDeg + '°';
+      renderGateInfo();
+    });
+
+    qc.addEventListener('change', function (e) {
+      setQubits(Number(e.target.value));
+      $('presetSelect').value = '';
+    });
+    ps.addEventListener('change', function (e) {
+      if (e.target.value) loadPreset(e.target.value);
+    });
+    $('btnClear').addEventListener('click', clearCircuit);
+    $('btnRandom').addEventListener('click', function () {
+      setQubits(n);
+      randomCircuit();
+      toast('已生成随机电路');
+    });
+    $('btnSample').addEventListener('click', function () {
+      sampleSeed = (sampleSeed + 1) & 0x7fffffff;
+      renderSample();
+    });
+
+    var svg = $('circuitSvg');
+    svg.addEventListener('click', function (e) {
+      var gateEl = e.target.closest ? e.target.closest('[data-gate-id]') : null;
+      if (gateEl) { removeGate(Number(gateEl.getAttribute('data-gate-id'))); return; }
+      var cell = e.target.closest ? e.target.closest('[data-cell]') : null;
+      if (cell) placeAt(Number(cell.getAttribute('data-q')), Number(cell.getAttribute('data-col')));
+    });
+    svg.addEventListener('contextmenu', function (e) {
+      if (pending) { e.preventDefault(); pending = null; renderCircuit(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && pending) { pending = null; renderCircuit(); }
+    });
+    window.addEventListener('resize', function () { renderHistogram(); });
+  }
+
+  /* ---------- public debug API (verification & demo rely on it) ---------- */
+
+  window.qubit = {
+    version: '1.0.0',
+    maxQubits: MAX_QUBITS,
+    gates: GATE_DEFS,
+    presets: PRESETS,
+    presetNames: Object.keys(PRESETS),
+    getQubits: function () { return n; },
+    setQubits: function (nq) { setQubits(nq); return n; },
+    addGate: function (g) { var gate = addGate(g); refresh(); return gate; },
+    setCircuit: function (list) {
+      circuit = [];
+      nextId = 1;
+      pending = null;
+      list.forEach(function (g) { addGate(g); });
+      $('presetSelect').value = '';
+      refresh();
+      return circuit.length;
+    },
+    clearCircuit: function () { circuit = []; pending = null; refresh(); },
+    loadPreset: function (name) { loadPreset(name); return n; },
+    randomCircuit: function (seed) { return randomCircuit(seed); },
+    run: function () { refresh(); return true; },
+    getState: function () { return { re: Array.from(st.re), im: Array.from(st.im) }; },
+    getProbs: function () { return Array.from(probs); },
+    getBloch: function (q) { return blochOf(q); },
+    getEntropy: function () { return shannonEntropy(); },
+    getStats: function () {
+      var norm = 0, peak = 0, nonzero = 0;
+      for (var i = 0; i < dim; i++) {
+        var p = probs[i]; norm += p;
+        if (p > peak) peak = p;
+        if (p > 1e-12) nonzero++;
+      }
+      return {
+        n: n, dim: dim, nonzero: nonzero, norm: norm, peak: peak,
+        entropy: shannonEntropy(), simMs: simMs, gateCount: circuit.length,
+        depth: circuit.length ? maxCol() + 1 : 0
+      };
+    },
+    getCircuit: function () {
+      return circuit.map(function (g) {
+        return { id: g.id, type: g.type, qubits: g.qubits.slice(), angle: g.angle, col: g.col };
+      });
+    },
+    sample: function (shots, seed) { return sampleShots(shots === undefined ? 2000 : shots, seed === undefined ? sampleSeed : seed); },
+    getBits: function (i) { return bitsOf(i); }
+  };
+
+  buildUI();
+  loadPreset('bell');
+})();
+</script>
+</body>
+</html>

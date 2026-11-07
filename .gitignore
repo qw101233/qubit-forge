@@ -1,0 +1,5 @@
+tools/crop-check.png
+tools/shots-meta.json
+node_modules/
+.DS_Store
+Thumbs.db

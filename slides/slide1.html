@@ -1,0 +1,128 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>Qubit Forge · 项目简介</title>
+<style>
+:root{
+  --bg:#05080f;--panel:rgba(15,23,40,.88);--line:rgba(120,180,255,.22);
+  --text:#eaf2ff;--muted:#93a8c8;--cyan:#38e1ff;--violet:#a98bff;
+  --magenta:#ff5cc8;--amber:#ffc857;--green:#52e0a4;
+  --mono:"Cascadia Code","JetBrains Mono",Consolas,"Courier New",monospace;
+  --sans:"Segoe UI","Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--bg)}
+body{font-family:var(--sans);color:var(--text);-webkit-font-smoothing:antialiased}
+.slide{
+  position:relative;width:1080px;height:1920px;padding:68px 72px 48px;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  background:
+    radial-gradient(720px 640px at 105% -6%, rgba(169,139,255,.20), transparent 64%),
+    radial-gradient(760px 700px at -10% 34%, rgba(56,225,255,.13), transparent 66%),
+    radial-gradient(900px 620px at 50% 112%, rgba(255,92,200,.09), transparent 68%),
+    #05080f;
+}
+.slide::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(120,170,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(120,170,255,.045) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:linear-gradient(180deg,transparent,#000 12%,#000 88%,transparent);
+}
+.eyebrow{
+  font-family:var(--mono);font-size:17px;letter-spacing:.32em;color:var(--cyan);
+  text-transform:uppercase;display:flex;align-items:center;gap:16px;
+}
+.eyebrow::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(56,225,255,.5),transparent)}
+h1{font-size:104px;line-height:1.02;letter-spacing:-.02em;margin-top:34px;font-weight:750;
+  background:linear-gradient(100deg,#ffffff 10%,#9fe9ff 40%,#b79dff 78%,#ff8ad8);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:70px;line-height:1.1;margin-top:22px;letter-spacing:-.01em;font-weight:750}
+h2 .accent{color:var(--cyan)}
+.sub{font-size:30px;color:#bfd3ee;margin-top:18px;font-weight:500;letter-spacing:.02em}
+.lead{font-size:24px;line-height:1.72;color:var(--muted);margin-top:24px;max-width:900px}
+.hero{
+  margin-top:34px;border-radius:26px;overflow:hidden;border:1px solid rgba(56,225,255,.30);
+  box-shadow:0 34px 90px rgba(0,0,0,.55),0 0 70px rgba(56,225,255,.10);
+  background:#080d18;
+}
+.hero img{display:block;width:100%;height:100%;object-fit:cover}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}
+.stat-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px 24px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.stat-card .num{font-family:var(--mono);font-size:46px;font-weight:700;color:var(--cyan);line-height:1}
+.stat-card .unit{font-family:var(--mono);font-size:15px;color:var(--muted);margin-left:8px;letter-spacing:.12em}
+.stat-card .k{display:block;font-size:16px;color:var(--muted);margin-top:12px}
+.signal-row{display:flex;justify-content:space-between;gap:18px;margin-top:26px;
+  padding:22px 26px;border:1px dashed rgba(120,180,255,.26);border-radius:18px;background:rgba(10,16,29,.55)}
+.signal-row div{display:flex;flex-direction:column;gap:6px}
+.signal-row b{font-family:var(--mono);font-size:26px;color:#dff4ff}
+.signal-row span{font-size:14px;color:var(--muted);letter-spacing:.04em}
+.feature{
+  display:grid;grid-template-columns:0.92fr 1.08fr;gap:26px;align-items:center;
+  background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045);
+}
+.feature .tag{font-family:var(--mono);font-size:14px;letter-spacing:.22em;color:var(--violet)}
+.feature h3{font-size:31px;margin-top:10px;font-weight:700;letter-spacing:.01em}
+.feature p{font-size:19px;line-height:1.68;color:var(--muted);margin-top:12px}
+.feature .mini{display:flex;gap:18px;margin-top:16px;font-size:15px;color:#cfe0f7}
+.feature .mini b{font-family:var(--mono);color:var(--cyan);font-size:19px}
+.fimg{height:300px;border-radius:16px;overflow:hidden;border:1px solid rgba(120,180,255,.20);background:#080d18}
+.fimg img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
+.verify-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.vcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 24px}
+.vcard .v{font-family:var(--mono);font-size:40px;font-weight:700;color:var(--green);line-height:1.1}
+.vcard .v.small{font-size:29px}
+.vcard .k{font-size:16px;color:var(--muted);margin-top:8px}
+.vcard .s{font-family:var(--mono);font-size:12px;color:rgba(147,168,200,.75);margin-top:6px}
+footer{
+  padding-top:22px;border-top:1px solid rgba(120,180,255,.18);
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  font-size:15px;color:var(--muted);
+}
+footer .repo{font-family:var(--mono);color:var(--cyan);font-size:15px}
+footer .page{font-family:var(--mono);color:rgba(147,168,200,.8)}
+.note{font-size:15px;color:var(--muted);margin-top:16px;line-height:1.6}
+.tech-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.tech{background:rgba(10,18,32,.62);border:1px solid rgba(120,180,255,.16);border-left:2px solid rgba(56,225,255,.6);
+  border-radius:14px;padding:18px 18px 20px}
+.tech .tno{font-family:var(--mono);font-size:12px;color:var(--violet);letter-spacing:.18em}
+.tech b{display:block;font-size:20px;margin-top:8px;font-weight:650}
+.tech p{font-size:14px;line-height:1.6;color:var(--muted);margin-top:7px}
+.pipeline{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:center;gap:10px;
+  background:rgba(10,18,32,.7);border:1px solid rgba(120,180,255,.18);border-radius:16px;padding:16px 18px;margin-top:26px}
+.pnode{text-align:center;padding:6px 4px}
+.pnode b{display:block;font-size:18px;font-weight:650}
+.pnode span{display:block;font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:5px}
+.parrow{color:var(--cyan);font-family:var(--mono);font-size:20px}
+.method-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.method{background:rgba(10,18,32,.62);border:1px solid rgba(120,180,255,.16);border-radius:14px;padding:18px 18px 20px}
+.method b{display:block;font-size:19px;color:#dff2ff;font-weight:650}
+.method span{display:block;font-size:13px;line-height:1.6;color:var(--muted);margin-top:7px}
+
+.hero{height:566px}
+.lead{max-width:940px}
+</style></head><body>
+<div class="slide">
+  <div class="eyebrow" data-qc>QUANTUM CIRCUIT WORKBENCH · STATEVECTOR LAB</div>
+  <h1 data-qc>Qubit Forge</h1>
+  <div class="sub" data-qc>量子电路工坊 —— 把量子态变成可触摸的画布</div>
+  <p class="lead" data-qc>在浏览器里点选量子门、搭建电路，实时求解 2<sup>n</sup> 维复振幅态矢量；振幅、相位、纠缠熵与测量采样在同一页面同步呈现。</p>
+  <div class="hero" data-qc><img src="../screenshots/demo-ui.png" alt="Qubit Forge 主界面"></div>
+  <div class="stats-row">
+    <div class="stat-card" data-qc><span class="num">12</span><span class="unit">QUBITS</span><span class="k">最大态矢量维度 4096</span></div>
+    <div class="stat-card" data-qc><span class="num">14</span><span class="unit">GATES</span><span class="k">旋转 / 受控 / Toffoli 全支持</span></div>
+    <div class="stat-card" data-qc><span class="num">39</span><span class="unit">CHECKS</span><span class="k">Playwright 断言全部通过</span></div>
+  </div>
+  <div class="tech-row">
+    <div class="tech" data-qc><span class="tno">01 / STATE</span><b>复振幅态矢量</b><p>Float64Array 实部/虚部双数组，4096 维毫秒级求解</p></div>
+    <div class="tech" data-qc><span class="tno">02 / RENDER</span><b>单文件零依赖</b><p>SVG 电路图 + Canvas 2D 面板，双击 index.html 即用</p></div>
+    <div class="tech" data-qc><span class="tno">03 / PROOF</span><b>可证伪实现</b><p>39 项断言对照解析解与独立 DFT 参考</p></div>
+  </div>
+  <div class="signal-row">
+    <div data-qc><b>4096</b><span>维复振幅态矢量</span></div>
+    <div data-qc><b>2000</b><span>shots / 可复现采样</span></div>
+    <div data-qc><b>0.8 ms</b><span>12 qubits 模拟中位耗时</span></div>
+  </div>
+  <footer data-qc><span>零依赖 · 双击 index.html 即运行</span><span class="repo">github.com/qw101233/qubit-forge</span><span class="page">01 / 03</span></footer>
+</div>
+</body></html>

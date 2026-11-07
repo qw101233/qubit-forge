@@ -1,0 +1,257 @@
+{
+  "status": "PASS",
+  "passed": 39,
+  "total": 39,
+  "timestamp": "2026-11-07T07:08:48.267Z",
+  "metrics": {
+    "version": "1.0.0",
+    "gateTypes": 14,
+    "presetCount": 7,
+    "maxQubits": 12,
+    "bell": {
+      "p00": 0.5000000000000001,
+      "p11": 0.5000000000000001,
+      "entropy": 1,
+      "r": 0
+    },
+    "ghz": {
+      "p000": 0.5000000000000001,
+      "p111": 0.5000000000000001,
+      "entropy": 1
+    },
+    "qft": {
+      "maxDeviation": 1.3877787807814457e-16,
+      "uniformMaxDev": 5.551115123125783e-17
+    },
+    "grover": {
+      "p11": 1.0000000000000004,
+      "gateCount": 12,
+      "depth": 7
+    },
+    "teleport": {
+      "fidelity": 1,
+      "x": 0.7998228343401385,
+      "z": 0.6002361482517587
+    },
+    "sampling": {
+      "shots": 2000,
+      "seed": 42,
+      "count00": 991,
+      "count11": 1009
+    },
+    "perf": {
+      "dim": 4096,
+      "gateCount": 29,
+      "medianMs": 0.8000000715255737,
+      "minMs": 0.7000000476837158,
+      "maxMs": 1,
+      "norm": 0.9999999999999901
+    },
+    "bellSampling": {
+      "shots": 2000,
+      "seed": 42,
+      "count00": 991,
+      "count11": 1009
+    },
+    "perfMedianMs": 0.8000000715255737,
+    "perfMinMs": 0.7000000476837158,
+    "randomNorm": 1.0000000000000002
+  },
+  "checks": [
+    {
+      "name": "0.1 页面启动并暴露 window.qubit",
+      "pass": true,
+      "detail": "version 1.0.0"
+    },
+    {
+      "name": "0.2 门类型数量 = 14",
+      "pass": true,
+      "detail": "14 种"
+    },
+    {
+      "name": "0.3 预设数量 = 7",
+      "pass": true,
+      "detail": "7 个"
+    },
+    {
+      "name": "0.4 最大量子比特 = 12",
+      "pass": true,
+      "detail": "12 qubits"
+    },
+    {
+      "name": "0.5 初始载入 Bell 电路",
+      "pass": true,
+      "detail": "2 门"
+    },
+    {
+      "name": "0.6 UI 点击放置单比特门（选 X → 点格子）",
+      "pass": true,
+      "detail": "circuit=1 type=X"
+    },
+    {
+      "name": "0.7 UI 两次点击放置 CNOT（控制位 + 目标位）",
+      "pass": true,
+      "detail": "circuit=1 qubits=0,1"
+    },
+    {
+      "name": "1.1 H|0⟩ 振幅 = 1/√2",
+      "pass": true,
+      "detail": "re=[0.707107, 0.707107]"
+    },
+    {
+      "name": "1.2 X|0⟩ = |1⟩",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1.3 Y|0⟩ = i|1⟩",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1.4 S·S = Z（|1⟩ → -|1⟩）",
+      "pass": true,
+      "detail": "re[1]=-1.000000"
+    },
+    {
+      "name": "1.5 T·T = S（|1⟩ → i|1⟩）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1.6 RX(θ)|0⟩ 对照 cos/sin 解析式",
+      "pass": true,
+      "detail": "re0=0.815618 im1=-0.578591"
+    },
+    {
+      "name": "1.7 RY(θ)|0⟩ = cos|0⟩ + sin|1⟩",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1.8 RZ(θ)|1⟩ 相位 = e^{iθ/2}",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "2.1 CNOT：控制位为 1 时翻转目标位",
+      "pass": true,
+      "detail": "P(|11⟩)=1"
+    },
+    {
+      "name": "2.2 CZ：仅 |11⟩ 获得 -1 相位",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "2.3 SWAP：|10⟩ → |01⟩",
+      "pass": true,
+      "detail": "P(|01⟩)=1"
+    },
+    {
+      "name": "2.4 Toffoli：双控制位为 1 时翻转目标位",
+      "pass": true,
+      "detail": "P(|111⟩)=1"
+    },
+    {
+      "name": "3.1 Bell 态：仅 |00⟩ 与 |11⟩，各 50%",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "3.2 Bell 态：单比特约化态最大混合（r≈0，S=1 bit）",
+      "pass": true,
+      "detail": "r=0.00e+0, S=1.000000"
+    },
+    {
+      "name": "3.3 GHZ-3：|000⟩ 与 |111⟩ 各 50%",
+      "pass": true,
+      "detail": "P000=0.5000000000000001, P111=0.5000000000000001"
+    },
+    {
+      "name": "3.4 GHZ-3：每个比特边缘熵 = 1 bit",
+      "pass": true,
+      "detail": "S=1.0000,1.0000,1.0000"
+    },
+    {
+      "name": "3.5 QFT-3 作用于 |000⟩：8 个基态等幅 1/8，相位为 0",
+      "pass": true,
+      "detail": "max|p-1/8|=5.55e-17"
+    },
+    {
+      "name": "3.6 QFT-3 作用于 |001⟩：振幅与独立 DFT 参考逐点一致",
+      "pass": true,
+      "detail": "max deviation=1.39e-16"
+    },
+    {
+      "name": "3.7 Grover 一次迭代：标记态 |11⟩ 命中率 = 100%",
+      "pass": true,
+      "detail": "P(|11⟩)=1.0000000000000004"
+    },
+    {
+      "name": "3.8 Deutsch–Jozsa 常函数：输入寄存器必为 00",
+      "pass": true,
+      "detail": "P(input=00)=1.0000000000000004"
+    },
+    {
+      "name": "3.9 Deutsch–Jozsa 平衡函数：输入寄存器必不为 00（本例为 10）",
+      "pass": true,
+      "detail": "P(00)=0.00e+0, P(10)=1.0000000000000004"
+    },
+    {
+      "name": "3.10 量子隐形传态：q2 约化态复原 RY(θ)|0⟩（布洛赫向量一致）",
+      "pass": true,
+      "detail": "q2: x=0.799823 z=0.600236 r=1.000000"
+    },
+    {
+      "name": "4.1 Bell 采样 2000 shots：只出现 00/11，总数为 2000",
+      "pass": true,
+      "detail": "00=991, 11=1009"
+    },
+    {
+      "name": "4.2 Bell 采样在 4σ 内（各 1000±90）",
+      "pass": true,
+      "detail": "偏差 9"
+    },
+    {
+      "name": "4.3 采样确定性：同 seed 结果完全一致，不同 seed 不同",
+      "pass": true,
+      "detail": "seed 42 vs 42 一致 / 42 vs 7 不同"
+    },
+    {
+      "name": "5.1 40 门随机电路后总概率保持 1（幺正性）",
+      "pass": true,
+      "detail": "norm=1.00000000000000"
+    },
+    {
+      "name": "5.2 6 qubits 维度 = 64",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "5.3 12 qubits（4096 维）25 门电路可运行",
+      "pass": true,
+      "detail": "dim=4096, gates=29"
+    },
+    {
+      "name": "5.4 12 qubits 模拟中位耗时 < 50 ms",
+      "pass": true,
+      "detail": "median 0.800 ms (min 0.700 / max 1.000)"
+    },
+    {
+      "name": "5.5 清空电路回到 |0…0⟩",
+      "pass": true,
+      "detail": "P(|0…0⟩)=1, gates=0"
+    },
+    {
+      "name": "5.6 电路 API 往返一致（类型/角度/比特）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "5.7 全流程无 pageerror / console error",
+      "pass": true,
+      "detail": "0 errors"
+    }
+  ]
+}
