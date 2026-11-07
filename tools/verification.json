@@ -2,7 +2,7 @@
   "status": "PASS",
   "passed": 39,
   "total": 39,
-  "timestamp": "2026-11-07T07:08:48.267Z",
+  "timestamp": "2026-11-07T07:22:22.209Z",
   "metrics": {
     "version": "1.0.0",
     "gateTypes": 14,
@@ -42,9 +42,9 @@
     "perf": {
       "dim": 4096,
       "gateCount": 29,
-      "medianMs": 0.8000000715255737,
-      "minMs": 0.7000000476837158,
-      "maxMs": 1,
+      "medianMs": 0.7000000476837158,
+      "minMs": 0.5999999046325684,
+      "maxMs": 2.399999976158142,
       "norm": 0.9999999999999901
     },
     "bellSampling": {
@@ -53,8 +53,8 @@
       "count00": 991,
       "count11": 1009
     },
-    "perfMedianMs": 0.8000000715255737,
-    "perfMinMs": 0.7000000476837158,
+    "perfMedianMs": 0.7000000476837158,
+    "perfMinMs": 0.5999999046325684,
     "randomNorm": 1.0000000000000002
   },
   "checks": [
@@ -236,7 +236,7 @@
     {
       "name": "5.4 12 qubits 模拟中位耗时 < 50 ms",
       "pass": true,
-      "detail": "median 0.800 ms (min 0.700 / max 1.000)"
+      "detail": "median 0.700 ms (min 0.600 / max 2.400)"
     },
     {
       "name": "5.5 清空电路回到 |0…0⟩",
